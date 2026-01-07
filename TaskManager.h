@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Task.h"
+#include "Person.h"
 
 /**
  * @brief Class managing tasks assigned to multiple persons.
@@ -12,8 +13,36 @@ private:
      * @brief Maximum number of persons the TaskManager can handle.
      */
     static const int MAX_PERSONS = 10;
+    static const int MAX_PRIORITY = 100;
+    int current_persons;
+    int recent_id;
+    Person persons[MAX_PERSONS];
 
-    // Note - Additional private fields and methods can be added if needed.
+    int findMaxTask(const SortedList<Task>::ConstIterator *tasks) const;
+
+    bool isWentOverAllTasks(const SortedList<Task>::ConstIterator *tasks) const;
+
+    class BumpTaskPriorityByType {
+        TaskType type;
+        int priority;
+
+    public:
+        BumpTaskPriorityByType(const TaskType &type, int priority): type(type), priority(priority) {
+        }
+
+        Task operator()(const Task &task) {
+            if (task.getType() == type) {
+                Task toAdd(task.getPriority() + priority > MAX_PRIORITY
+                               ? MAX_PRIORITY
+                               : task.getPriority() + priority,
+                           task.getType(),
+                           task.getDescription());
+                toAdd.setId(task.getId());
+                return toAdd;
+            }
+            return task;
+        }
+    };
 
 public:
     /**
