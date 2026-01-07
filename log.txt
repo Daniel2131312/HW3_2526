@@ -1,0 +1,19 @@
+* commit c10fc83c671fb8385524318b5c9d4738e0acb459
+| Author: Avi <avichaitamar@campus.technion.ac.il>
+| Date:   Sun Jul 13 02:37:15 2025 +0300
+| 
+|     TaskManager files commit
+| 
+|  TaskManager.cpp | 172 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+|  TaskManager.h   | 172 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+|  2 files changed, 344 insertions(+)
+| 
+* commit 69de96bd61470ba525ba3e002bbc51b64fb51a04
+  Author: Daniel Gelman <danielgelman@campus.technion.ac.il>
+  Date:   Sun Jul 13 01:50:42 2025 +0300
+  
+      dry and SortedList.h commit
+  
+   SortedList.h | 215 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   dry.pdf      | Bin 0 -> 43513 bytes
+   2 files changed, 215 insertions(+)
