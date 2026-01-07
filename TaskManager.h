@@ -30,7 +30,7 @@ private:
         BumpTaskPriorityByType(const TaskType &type, int priority): type(type), priority(priority) {
         }
 
-        Task operator()(const Task &task) {
+        Task operator()(const Task &task) const {
             if (task.getType() == type) {
                 Task toAdd(task.getPriority() + priority > MAX_PRIORITY
                                ? MAX_PRIORITY
