@@ -3,55 +3,174 @@
 #include <iostream>
 #include <stdexcept>
 
+
 namespace mtm {
+    template<typename T>
 
-    template <typename T>
     class SortedList {
-    public:
-        /**
-         *
-         * the class should support the following public interface:
-         * if needed, use =defualt / =delete
-         *
-         * constructors and destructor:
-         * 1. SortedList() - creates an empty list.
-         * 2. copy constructor
-         * 3. operator= - assignment operator
-         * 4. ~SortedList() - destructor
-         *
-         * iterator:
-         * 5. class ConstIterator;
-         * 6. begin method
-         * 7. end method
-         *
-         * functions:
-         * 8. insert - inserts a new element to the list
-         * 9. remove - removes an element from the list
-         * 10. length - returns the number of elements in the list
-         * 11. filter - returns a new list with elements that satisfy a given condition
-         * 12. apply - returns a new list with elements that were modified by an operation
-         */
+    private:
+        struct Node {
+            T data;
+            Node *next;
+        };
 
+        int size;
+        Node *head;
+
+        void clearList() {
+            Node *current = head;
+            while (current != nullptr) {
+                Node *next = current->next;
+                delete current;
+                current = next;
+            }
+            head = nullptr;
+            size = 0;
+        }
+
+        void fillList(const SortedList &toAdd) {
+            for (const T &t: toAdd) {
+                insert(t);
+            }
+        }
+
+    public:
+        class ConstIterator;
+        friend ConstIterator;
+
+        SortedList(): size(0), head(nullptr) {
+        }
+
+        SortedList(const SortedList &other) : size(0), head(nullptr) {
+            fillList(other);
+        }
+
+        ~SortedList() {
+            clearList();
+        }
+
+        SortedList &operator=(const SortedList &other) {
+            if (&other == this) {
+                return *this;
+            }
+            try {
+                SortedList toAssign(other);
+                int tmpSize = size;
+                size = toAssign.length();
+                Node *tmp = this->head;
+                head = toAssign.head;
+                toAssign.head = tmp;
+                toAssign.size = tmpSize;
+                return *this;
+            } catch (const std::runtime_error &e) {
+                return *this;
+            }
+        }
+
+        void insert(const T &toAdd) {
+            if (head == nullptr || toAdd > head->data) {
+                head = new Node{toAdd, head};
+                size++;
+                return;
+            }
+            Node *ptr = head;
+
+            while (ptr != nullptr && ptr->next != nullptr && ptr->next->data > toAdd) {
+                ptr = ptr->next;
+            }
+            ptr->next = new Node{toAdd, ptr->next};
+            size++;
+        }
+
+        ConstIterator begin() const {
+            return ConstIterator(head);
+        }
+
+        ConstIterator end() const {
+            return ConstIterator();
+        }
+
+        void remove(ConstIterator toRemove) {
+            if (toRemove.current == nullptr || head == nullptr) {
+                return;
+            }
+            Node *ptr = head;
+            if (head == toRemove.current) {
+                head = head->next;
+                delete ptr;
+                size--;
+                return;
+            }
+            while (ptr != nullptr && ptr->next != toRemove.current) {
+                ptr = ptr->next;
+            }
+            if (!ptr || !ptr->next) {
+                return;
+            }
+            Node *toDelete = ptr->next;
+            ptr->next = toDelete->next;
+            delete toDelete;
+            size--;
+        }
+
+        int length() const {
+            return size;
+        }
+
+        template<typename Operation>
+        SortedList apply(Operation func) const {
+            SortedList newList;
+
+            for (const T &t: *this) {
+                newList.insert(func(t));
+            }
+            return newList;
+        }
+
+        template<typename Predicate>
+        SortedList filter(Predicate func) const {
+            SortedList filtered;
+
+            for (const T &t: *this) {
+                if (func(t)) {
+                    filtered.insert(t);
+                }
+            }
+            return filtered;
+        }
     };
 
-    template <class T>
+    template<class T>
     class SortedList<T>::ConstIterator {
-    /**
-     * the class should support the following public interface:
-     * if needed, use =defualt / =delete
-     *
-     * constructors and destructor:
-     * 1. a ctor(or ctors) your implementation needs
-     * 2. copy constructor
-     * 3. operator= - assignment operator
-     * 4. ~ConstIterator() - destructor
-     *
-     * operators:
-     * 5. operator* - returns the element the iterator points to
-     * 6. operator++ - advances the iterator to the next element
-     * 7. operator!= - returns true if the iterator points to a different element
-     *
-     */
+    private:
+        Node *current;
+
+    public:
+        friend SortedList;
+
+        ConstIterator() : current(nullptr) {
+        }
+
+        ConstIterator(const ConstIterator &toCopy) : current(toCopy.current) {
+        }
+
+        ConstIterator(Node *p) : current(p) {
+        }
+
+        ConstIterator &operator++() {
+            if (!current) {
+                throw std::out_of_range("Out of bound");
+            }
+            current = current->next;
+            return *this;
+        }
+
+        const T &operator*() const {
+            return current->data;
+        }
+
+        bool operator!=(const ConstIterator &toCompare) const {
+            return current != toCompare.current;
+        }
     };
 }
-
